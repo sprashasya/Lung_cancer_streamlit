@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import pickle
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 # Load the pre-trained scaler and model
 scaler = pickle.load(open("scaler.pkl", "rb"))
@@ -64,10 +66,16 @@ if st.sidebar.button("View Example Data"):
     st.subheader("Example Data")
     st.write(example_data.head(10))  # Show first 10 rows
 
+    st.markdown("""
+        **Legend:**
+        - **1** → No
+        - **2** → Yes
+        """)
 
 
 if uploaded_file is not None:
     input_df = pd.read_csv(uploaded_file)
+    input_df.columns = input_df.columns.str.strip()
     st.sidebar.success("CSV uploaded successfully!")
 else:
     input_df = user_input_features()
@@ -78,23 +86,51 @@ feature_names = [
     "COUGHING", "SHORTNESS OF BREATH", "SWALLOWING DIFFICULTY", "CHEST PAIN"
 ]
 
-# Scaling the input
-data_scaled = scaler.transform(input_df)
+if st.sidebar.button("Predict"):  
+    # Scaling the input
+    data_scaled = scaler.transform(input_df)
 
-# Making predictions
-predictions = model.predict(data_scaled)
-predictions_proba = model.predict_proba(data_scaled)
+    # Making predictions
+    predictions = model.predict(data_scaled)
+    predictions_proba = model.predict_proba(data_scaled)
 
-st.subheader("User Input Features")
-st.write(input_df)
+    st.subheader("User Input Features")
+    st.write(input_df)
 
-st.subheader("Predictions")
-input_df["Lung Cancer Risk"] = ["Yes" if pred == 1 else "No" for pred in predictions]
-st.write(input_df[["Lung Cancer Risk"]])
+    st.subheader("Predictions")
+    input_df["Lung Cancer Risk"] = ["Yes" if pred == 1 else "No" for pred in predictions]
+    st.write(input_df[["Lung Cancer Risk"]])
 
-st.subheader("Prediction Probability")
-probability_df = pd.DataFrame({
-    "Lung Cancer": ["No", "Yes"],
-    "Probability": [f"{predictions_proba[0][0]:.2f}", f"{predictions_proba[0][1]:.2f}"]
-})
-st.table(probability_df)
+    st.subheader("Prediction Probability")
+    probability_df = pd.DataFrame({
+        "Lung Cancer": ["No", "Yes"],
+        "Probability": [f"{predictions_proba[0][0]:.2f}", f"{predictions_proba[0][1]:.2f}"]
+    })
+    st.table(probability_df)
+
+    st.subheader("Prediction Probability")
+
+    # Get predicted probabilities
+    prob_no = predictions_proba[0][0]  # Probability of "No"
+    prob_yes = predictions_proba[0][1]  # Probability of "Yes"
+
+    # Determine colors
+    colors = ["green" if prob_no > prob_yes else "gray",  
+              "red" if prob_yes > prob_no else "gray"]  
+
+    # Create bar plot
+    fig, ax = plt.subplots()
+    ax.bar(["No", "Yes"], [prob_no, prob_yes], color=colors)
+    ax.set_ylim([0, 1])
+    ax.set_ylabel("Probability", labelpad=15)  # Adjust label padding
+    ax.set_title("Lung Cancer Prediction Probability", pad=20)  # Adjust title padding
+
+    # Add probability values on bars
+    for i, prob in enumerate([prob_no, prob_yes]):
+        ax.text(i, prob + 0.02, f"{prob*100:.1f}%", ha="center", fontsize=12, fontweight="bold")
+
+    # Adjust layout to prevent overlap
+    plt.tight_layout()
+
+    # Display plot
+    st.pyplot(fig)
