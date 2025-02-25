@@ -18,7 +18,7 @@ st.sidebar.header("User Input Features")
 
 # Function to get manual user input
 def user_input_features():
-    GENDER = st.sidebar.selectbox("Gender", ("Male", "Female","Others"))
+    GENDER = st.sidebar.selectbox("Gender", ("Male", "Female", "Others"))
     AGE = st.sidebar.slider("Age", 20, 90, 50)
     
     options = {"No": 1, "Yes": 2}  
@@ -58,8 +58,37 @@ def user_input_features():
     features = pd.DataFrame(data, index=[0])
     return features
 
-# CSV Upload
+# Initial Image and Details (before prediction)
+if "show_info" not in st.session_state:
+    st.session_state.show_info = True
 
+# Function to display the static image and info
+def display_initial_info():
+    st.image("image.jpg", caption="Lung Cancer Overview")  # Update the image path
+    st.subheader("How to Prevent Lung Cancer?")
+    st.write("""
+    - **Quit Smoking:** Smoking is the leading cause of lung cancer.
+    - **Limit Exposure to Toxins:** Avoid exposure to harmful substances.
+    - **Regular Check-ups:** Early detection saves lives.
+    """)
+    st.subheader("Why Lung Cancer Happens?")
+    st.write("""
+    - **Smoking:** The major risk factor for lung cancer.
+    - **Genetics:** Family history plays a role.
+    - **Radon Exposure:** Inhalation of radon gas increases risk.
+    """)
+    st.subheader("Causes of Lung Cancer")
+    st.write("""
+    - **Cigarette Smoke:** Includes both active smoking and secondhand smoke.
+    - **Air Pollution:** Long-term exposure to polluted air.
+    - **Genetics:** Family history increases the chances.
+    """)
+
+# Initial load: Show info
+if st.session_state.show_info:
+    display_initial_info()
+
+# CSV Upload
 uploaded_file = st.sidebar.file_uploader("Upload CSV File", type=["csv"])
 if st.sidebar.button("View Example Data"):
     example_data = pd.read_csv("Lung_cancer_detection.csv")  # Ensure correct file path
@@ -70,7 +99,7 @@ if st.sidebar.button("View Example Data"):
         **Legend:**
         - **1** → No
         - **2** → Yes
-        """)
+    """)
 
 
 if uploaded_file is not None:
@@ -80,6 +109,7 @@ if uploaded_file is not None:
 else:
     input_df = user_input_features()
 
+# Display features
 feature_names = [
     "GENDER", "AGE", "SMOKING", "YELLOW_FINGERS", "ANXIETY", "PEER_PRESSURE",
     "CHRONIC DISEASE", "FATIGUE ", "ALLERGY ", "WHEEZING", "ALCOHOL CONSUMING",
@@ -94,6 +124,10 @@ if st.sidebar.button("Predict"):
     predictions = model.predict(data_scaled)
     predictions_proba = model.predict_proba(data_scaled)
 
+    # Hide the static information and image after prediction
+    st.session_state.show_info = False
+
+    # Display prediction result and graph
     st.subheader("User Input Features")
     st.write(input_df)
 
@@ -108,29 +142,9 @@ if st.sidebar.button("Predict"):
     })
     st.table(probability_df)
 
-    st.subheader("Prediction Probability")
-
-    # Get predicted probabilities
-    prob_no = predictions_proba[0][0]  # Probability of "No"
-    prob_yes = predictions_proba[0][1]  # Probability of "Yes"
-
-    # Determine colors
-    colors = ["green" if prob_no > prob_yes else "gray",  
-              "red" if prob_yes > prob_no else "gray"]  
-
-    # Create bar plot
+    # Display a sample graph (e.g., bar plot for the prediction probabilities)
     fig, ax = plt.subplots()
-    ax.bar(["No", "Yes"], [prob_no, prob_yes], color=colors)
-    ax.set_ylim([0, 1])
-    ax.set_ylabel("Probability", labelpad=15)  # Adjust label padding
-    ax.set_title("Lung Cancer Prediction Probability", pad=20)  # Adjust title padding
-
-    # Add probability values on bars
-    for i, prob in enumerate([prob_no, prob_yes]):
-        ax.text(i, prob + 0.02, f"{prob*100:.1f}%", ha="center", fontsize=12, fontweight="bold")
-
-    # Adjust layout to prevent overlap
-    plt.tight_layout()
-
-    # Display plot
+    sns.barplot(x=["No", "Yes"], y=predictions_proba[0], ax=ax)
+    ax.set_title("Prediction Probability")
+    ax.set_ylabel("Probability")
     st.pyplot(fig)
