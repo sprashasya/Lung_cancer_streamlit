@@ -58,11 +58,7 @@ def user_input_features():
     features = pd.DataFrame(data, index=[0])
     return features
 
-# Initial Image and Details (before prediction)
-if "show_info" not in st.session_state:
-    st.session_state.show_info = True
-
-# Function to display the static image and info
+# Display Image and Information (Only Before Prediction)
 def display_initial_info():
     st.image("image.jpg", caption="Lung Cancer Overview")  # Update the image path
     st.subheader("How to Prevent Lung Cancer?")
@@ -84,24 +80,8 @@ def display_initial_info():
     - **Genetics:** Family history increases the chances.
     """)
 
-# Initial load: Show info
-if st.session_state.show_info:
-    display_initial_info()
-
-# CSV Upload
+# Load CSV File or Get User Inputs
 uploaded_file = st.sidebar.file_uploader("Upload CSV File", type=["csv"])
-if st.sidebar.button("View Example Data"):
-    example_data = pd.read_csv("Lung_cancer_detection.csv")  # Ensure correct file path
-    st.subheader("Example Data")
-    st.write(example_data.head(10))  # Show first 10 rows
-
-    st.markdown("""
-        **Legend:**
-        - **1** → No
-        - **2** → Yes
-    """)
-
-
 if uploaded_file is not None:
     input_df = pd.read_csv(uploaded_file)
     input_df.columns = input_df.columns.str.strip()
@@ -109,23 +89,14 @@ if uploaded_file is not None:
 else:
     input_df = user_input_features()
 
-# Display features
-feature_names = [
-    "GENDER", "AGE", "SMOKING", "YELLOW_FINGERS", "ANXIETY", "PEER_PRESSURE",
-    "CHRONIC DISEASE", "FATIGUE ", "ALLERGY ", "WHEEZING", "ALCOHOL CONSUMING",
-    "COUGHING", "SHORTNESS OF BREATH", "SWALLOWING DIFFICULTY", "CHEST PAIN"
-]
-
-if st.sidebar.button("Predict"):  
-    # Scaling the input
+# If 'Predict' button is clicked
+if st.sidebar.button("Predict"):
+    # Scaling the input data
     data_scaled = scaler.transform(input_df)
 
     # Making predictions
     predictions = model.predict(data_scaled)
     predictions_proba = model.predict_proba(data_scaled)
-
-    # Hide the static information and image after prediction
-    st.session_state.show_info = False
 
     # Display prediction result and graph
     st.subheader("User Input Features")
@@ -148,3 +119,7 @@ if st.sidebar.button("Predict"):
     ax.set_title("Prediction Probability")
     ax.set_ylabel("Probability")
     st.pyplot(fig)
+
+else:
+    # Display initial image and info until "Predict" is clicked
+    display_initial_info()
