@@ -82,6 +82,19 @@ def display_initial_info():
 
 # Load CSV File or Get User Inputs
 uploaded_file = st.sidebar.file_uploader("Upload CSV File", type=["csv"])
+
+# Show Example CSV Data
+if st.sidebar.button("View Example Data"):
+    example_data = pd.read_csv("Lung_cancer_detection.csv")  # Ensure correct file path
+    st.subheader("Example Data")
+    st.write(example_data.head(10))  # Show first 10 rows of the example CSV
+    st.markdown("""
+        **Legend:**
+        - **1** → No
+        - **2** → Yes
+    """)
+
+# Check if the user uploaded a file
 if uploaded_file is not None:
     input_df = pd.read_csv(uploaded_file)
     input_df.columns = input_df.columns.str.strip()
