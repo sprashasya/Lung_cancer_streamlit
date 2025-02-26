@@ -126,12 +126,23 @@ if st.sidebar.button("Predict"):
     })
     st.table(probability_df)
 
-    # Display a sample graph (e.g., bar plot for the prediction probabilities)
+    
     fig, ax = plt.subplots()
-    sns.barplot(x=["No", "Yes"], y=predictions_proba[0], ax=ax)
+
+    # Set colors based on which probability is higher
+    colors = ['green' if predictions_proba[0][0] > predictions_proba[0][1] else 'grey', 
+              'red' if predictions_proba[0][1] > predictions_proba[0][0] else 'grey']
+
+    # Create a bar plot with custom colors
+    sns.barplot(x=["No", "Yes"], y=predictions_proba[0], ax=ax, hue=["No", "Yes"], dodge=False, palette=colors)
+
     ax.set_title("Prediction Probability")
     ax.set_ylabel("Probability")
+
+    # Display the plot
     st.pyplot(fig)
+
+
 
 else:
     # Display initial image and info until "Predict" is clicked
