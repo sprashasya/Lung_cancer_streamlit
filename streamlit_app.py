@@ -60,7 +60,7 @@ def user_input_features():
 
 # Display Image and Information (Only Before Prediction)
 def display_initial_info():
-    st.image("image.jpg", caption="Lung Cancer Overview")  # Update the image path
+    st.image("image.jpg")  # Update the image path
     st.subheader("How to Prevent Lung Cancer?")
     st.write("""
     - **Quit Smoking:** Smoking is the leading cause of lung cancer.
