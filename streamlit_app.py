@@ -57,8 +57,7 @@ def user_input_features():
 
     features = pd.DataFrame(data, index=[0])
     return features
-
-# Display Image and Information (Only Before Prediction)
+# Display Image and Information 
 def display_initial_info():
     st.image("image.jpg")  # Update the image path
     st.subheader("How to Prevent Lung Cancer?")
@@ -125,8 +124,6 @@ if st.sidebar.button("Predict"):
         "Probability": [f"{predictions_proba[0][0]:.2f}", f"{predictions_proba[0][1]:.2f}"]
     })
     st.table(probability_df)
-
-    
     fig, ax = plt.subplots()
 
     # Set colors based on which probability is higher
@@ -138,12 +135,8 @@ if st.sidebar.button("Predict"):
 
     ax.set_title("Prediction Probability")
     ax.set_ylabel("Probability")
-
     # Display the plot
     st.pyplot(fig)
-
-
-
 else:
     # Display initial image and info until "Predict" is clicked
     display_initial_info()
