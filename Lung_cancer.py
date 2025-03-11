@@ -469,3 +469,23 @@ with open("scaler.pkl", "wb") as scaler_file:
     pickle.dump(scaler, scaler_file)
 
 
+from tensorflow import keras
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
+
+# Define the Neural Network
+model = Sequential([
+    Dense(64, activation='relu', input_shape=(X_train_scaled.shape[1],)),  # Input Layer
+    Dense(32, activation='relu'),  # Hidden Layer
+    Dense(1, activation='sigmoid')  # Output Layer for binary classification
+])
+
+# Compile the model
+model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+
+# Train the model
+model.fit(X_train_scaled, y_train_resampled, epochs=20, batch_size=16, validation_data=(X_test_scaled, y_test))
+
+# Evaluate the model
+loss, accuracy_nn = model.evaluate(X_test_scaled, y_test)
+print(f"Neural Network Accuracy: {accuracy_nn:.4f}")
