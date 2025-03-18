@@ -25,7 +25,7 @@ imbalanced-learn==0.13.0
 ipykernel==6.29.5
 ipython==8.32.0
 jedi==0.19.2
-Jinja2==3.1.5
+Jinja2==3.1.6
 joblib==1.4.2
 jsonschema==4.23.0
 jsonschema-specifications==2024.10.1
